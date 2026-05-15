@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { db, accessRequests } from "@/lib/db";
-import { sendEmail, adminNotificationTemplate } from "@/lib/email";
+import { desc, eq } from "drizzle-orm";
+import { db, accessRequests, magicLinkTokens } from "@/lib/db";
+import {
+  sendEmail,
+  adminNotificationTemplate,
+  magicLinkEmailTemplate,
+} from "@/lib/email";
+import { generateMagicLinkToken } from "@/lib/auth";
 
 const schema = z.object({
   name: z.string().min(2),
@@ -23,12 +29,35 @@ export async function POST(req: Request) {
     }
 
     const { name, email, company, role, notes } = parsed.data;
+    const normalizedEmail = email.toLowerCase();
 
+    // If this email already has an approved request, just issue a new
+    // magic link directly — no admin re-approval needed.
+    const existing = await db
+      .select()
+      .from(accessRequests)
+      .where(eq(accessRequests.email, normalizedEmail))
+      .orderBy(desc(accessRequests.requestedAt))
+      .limit(1);
+
+    const prior = existing[0];
+
+    if (prior?.status === "approved") {
+      await issueMagicLink({ email: normalizedEmail, name: prior.name });
+      return NextResponse.json({ ok: true, mode: "reissued" });
+    }
+
+    if (prior?.status === "pending") {
+      // Already pending — don't spam admin, just acknowledge
+      return NextResponse.json({ ok: true, mode: "already-pending" });
+    }
+
+    // Fresh request (new email, or previously denied)
     const [request] = await db
       .insert(accessRequests)
       .values({
         name,
-        email: email.toLowerCase(),
+        email: normalizedEmail,
         company,
         role,
         notes: notes ?? null,
@@ -36,7 +65,6 @@ export async function POST(req: Request) {
       })
       .returning();
 
-    // Notify admin (don't fail request if email fails)
     const adminEmail = process.env.ADMIN_EMAIL;
     if (adminEmail) {
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "";
@@ -58,12 +86,34 @@ export async function POST(req: Request) {
       }
     }
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, mode: "new" });
   } catch (err) {
     console.error("Access request error:", err);
-    return NextResponse.json(
-      { error: "Internal error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
+  }
+}
+
+async function issueMagicLink({
+  email,
+  name,
+}: {
+  email: string;
+  name: string;
+}) {
+  const { token, tokenHash, expiresAt } = generateMagicLinkToken();
+  await db.insert(magicLinkTokens).values({
+    email,
+    tokenHash,
+    expiresAt,
+  });
+
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
+  const url = `${baseUrl}/api/auth/signin?token=${token}`;
+  const template = magicLinkEmailTemplate({ url, recipientName: name });
+
+  try {
+    await sendEmail({ to: email, ...template });
+  } catch (err) {
+    console.error("Failed to send magic link:", err);
   }
 }

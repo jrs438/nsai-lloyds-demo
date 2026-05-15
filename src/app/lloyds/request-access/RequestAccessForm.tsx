@@ -15,8 +15,28 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
+type Mode = "new" | "reissued" | "already-pending";
+
+const MESSAGES: Record<Mode, { label: string; title: string; body: string }> = {
+  new: {
+    label: "Received",
+    title: "Request submitted.",
+    body: "If approved, a magic link will be sent to the email you provided. You can close this tab.",
+  },
+  reissued: {
+    label: "New link sent",
+    title: "Check your email.",
+    body: "This email is already approved. A fresh magic link has been sent — it's valid for 7 days.",
+  },
+  "already-pending": {
+    label: "Already pending",
+    title: "Request already in review.",
+    body: "We have a pending request for this email. You'll receive a magic link once it's approved.",
+  },
+};
+
 export function RequestAccessForm() {
-  const [submitted, setSubmitted] = useState(false);
+  const [submittedMode, setSubmittedMode] = useState<Mode | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
@@ -39,24 +59,25 @@ export function RequestAccessForm() {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error ?? "Submission failed");
       }
-      setSubmitted(true);
+      const data = (await res.json()) as { mode?: Mode };
+      setSubmittedMode(data.mode ?? "new");
     } catch (e) {
       setSubmitError(e instanceof Error ? e.message : "Submission failed");
     }
   }
 
-  if (submitted) {
+  if (submittedMode) {
+    const msg = MESSAGES[submittedMode];
     return (
       <div className="card p-10">
         <div className="section-label mb-4" style={{ color: "var(--trace-rule-fired)" }}>
-          Received
+          {msg.label}
         </div>
         <h2 className="font-serif text-2xl font-light mb-4">
-          Request submitted.
+          {msg.title}
         </h2>
         <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-          If approved, a magic link will be sent to the email you provided. You
-          can close this tab.
+          {msg.body}
         </p>
       </div>
     );
