@@ -1,0 +1,105 @@
+@import '../styles/tokens.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  border-color: var(--border-subtle);
+}
+
+html,
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans), Inter, system-ui, -apple-system, sans-serif;
+  font-weight: 400;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  min-height: 100vh;
+}
+
+::selection {
+  background: var(--accent-primary-dim);
+  color: var(--text-accent);
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .font-serif {
+    font-family: var(--font-serif), 'Source Serif 4', Georgia, serif;
+  }
+  .font-mono {
+    font-family: var(--font-mono), 'JetBrains Mono', Menlo, monospace;
+  }
+  .font-sans {
+    font-family: var(--font-sans), Inter, system-ui, sans-serif;
+  }
+  .section-label {
+    font-family: var(--font-sans), Inter, system-ui, sans-serif;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+  }
+  .display-serif {
+    font-family: var(--font-serif), 'Source Serif 4', Georgia, serif;
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+  .border-subtle {
+    border-color: var(--border-subtle);
+  }
+  .border-default {
+    border-color: var(--border-default);
+  }
+  .border-strong {
+    border-color: var(--border-strong);
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium transition-colors;
+    background: var(--accent-primary);
+    color: var(--bg-primary);
+    border: 1px solid var(--accent-primary);
+  }
+  .btn-primary:hover {
+    background: var(--accent-primary-dim);
+    border-color: var(--accent-primary-dim);
+  }
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium transition-colors;
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border-default);
+  }
+  .btn-secondary:hover {
+    border-color: var(--text-primary);
+  }
+  .card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+  }
+  .input {
+    @apply w-full px-3 py-2.5 text-sm;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-default);
+    color: var(--text-primary);
+  }
+  .input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+  }
+  .input::placeholder {
+    color: var(--text-tertiary);
+  }
+}

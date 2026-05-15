@@ -1,0 +1,85 @@
+import type { MarineHullSubmission } from "@/ontology/classes/marine";
+
+// Submission C — Older container vessel with loss history that triggers multiple referrals
+export const MarineHullSubmissionC: MarineHullSubmission = {
+  submissionId: "MH-2026-0156",
+  insured: {
+    name: "Pacific Container Lines (Pte) Ltd",
+    domicile: "SG",
+    ultimateBeneficialOwners: ["Pacific Holdings (BVI) Ltd"],
+  },
+  broker: {
+    name: "Far East Marine Brokers Ltd",
+    lloydsAccredited: true,
+    contactRole: "Marine Hull Broker",
+  },
+  vessel: {
+    name: "MV Pacific Endeavour",
+    imoNumber: "9325617",
+    type: "Container Vessel",
+    subClass: "Sub-Panamax 2,800 TEU",
+    yearBuilt: 2008,
+    vesselAgeYears: 18,
+    flag: "PA",
+    flagState: "Panama",
+    grossTonnage: 41_200,
+    deadweight: 50_400,
+    length: 245,
+    hullMaterial: "Steel",
+    propulsionType: "MAN B&W 7K80MC-C",
+    classificationSociety: "NK",
+    classStatus: "active",
+    lastSurveyDate: "2024-08-30",
+    surveyAgeMonths: 21,
+    lastDryDockDate: "2022-05-18",
+    technicalManager: "Asia Pacific Ship Management Pte Ltd",
+    ISMCompliance: true,
+    detentionHistory: 2,
+    iceClass: null,
+  },
+  coverage: {
+    hullValue: 18_500_000,
+    increasedValue: 3_700_000,
+    interest: ["H&M", "IV"],
+    deductible: 100_000,
+    currency: "USD",
+    inceptionDate: "2026-06-15",
+    expiryDate: "2027-06-15",
+    preferredWording: "LMA5395",
+  },
+  tradingArea: {
+    description: "Asia-Pacific coastwise, including occasional Indian Ocean transits",
+    excludedRegions: [
+      "sanctioned-CU",
+      "sanctioned-IR",
+      "sanctioned-KP",
+      "sanctioned-SY",
+    ],
+    primaryRoutes: [
+      "Singapore-China feeder",
+      "Asia-East Africa",
+      "Occasional Red Sea / Gulf of Aden transits",
+    ],
+  },
+  lossHistory: [
+    {
+      date: "2024-03-22",
+      type: "Engine room fire",
+      paidAmount: 1_850_000,
+      description: "Fire in engine room control panel; structural and machinery damage; vessel off-hire 47 days.",
+      status: "Settled",
+    },
+    {
+      date: "2023-11-08",
+      type: "Heavy weather damage",
+      paidAmount: 320_000,
+      description: "Container loss and deck-rail damage in typhoon transit, South China Sea.",
+      status: "Settled",
+    },
+  ],
+  context: {
+    requestedLeadLine: 0.10,
+    requestedTotalPlacement: 1.0,
+    inForceMarkets: [],
+  },
+};
