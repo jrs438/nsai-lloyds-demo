@@ -9,6 +9,7 @@ import type { PlacementRecommendation } from "@/lib/placement-engine";
 import { SubmissionViewer } from "./SubmissionViewer";
 import { PlacementRecommendationPanel } from "./PlacementRecommendation";
 import { ReasoningTrace } from "@/components/reasoning/ReasoningTrace";
+import { SlipBuilder } from "./SlipBuilder";
 
 interface SubmissionItem {
   key: SubmissionKey;
@@ -26,6 +27,7 @@ export function BrokerDemo({
   submissions: SubmissionItem[];
 }) {
   const [activeKey, setActiveKey] = useState<SubmissionKey>("A");
+  const [slipOpen, setSlipOpen] = useState(false);
   const active = submissions.find((s) => s.key === activeKey) ?? submissions[0];
 
   return (
@@ -80,7 +82,10 @@ export function BrokerDemo({
             <SubmissionViewer submission={active.submission} />
           </div>
           <div className="col-span-12 lg:col-span-4">
-            <PlacementRecommendationPanel placement={active.placement} />
+            <PlacementRecommendationPanel
+              placement={active.placement}
+              onBuildSlip={() => setSlipOpen(true)}
+            />
           </div>
           <div className="col-span-12 lg:col-span-4">
             <ReasoningTrace
@@ -114,6 +119,13 @@ export function BrokerDemo({
           </div>
         </div>
       </div>
+
+      <SlipBuilder
+        open={slipOpen}
+        onOpenChange={setSlipOpen}
+        submission={active.submission}
+        placement={active.placement}
+      />
     </section>
   );
 }

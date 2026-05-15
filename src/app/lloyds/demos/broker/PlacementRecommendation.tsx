@@ -1,10 +1,12 @@
 import type { PlacementRecommendation, SyndicateEvaluation } from "@/lib/placement-engine";
-import { AlertTriangle, Check, CircleAlert } from "lucide-react";
+import { AlertTriangle, Check, CircleAlert, FileText } from "lucide-react";
 
 export function PlacementRecommendationPanel({
   placement,
+  onBuildSlip,
 }: {
   placement: PlacementRecommendation;
+  onBuildSlip?: () => void;
 }) {
   return (
     <div className="card">
@@ -70,6 +72,14 @@ export function PlacementRecommendationPanel({
             of hull value · derived from rule-based pricing across eligible
             syndicates
           </div>
+          {onBuildSlip && (
+            <button
+              onClick={onBuildSlip}
+              className="btn-primary text-sm mt-4 w-full justify-center"
+            >
+              <FileText className="w-4 h-4" /> Build slip →
+            </button>
+          )}
         </div>
 
         {placement.flaggedIssues.length > 0 && (
