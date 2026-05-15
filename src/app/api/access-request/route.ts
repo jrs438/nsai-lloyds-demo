@@ -17,6 +17,17 @@ const schema = z.object({
   notes: z.string().optional(),
 });
 
+function getOriginFromRequest(req: Request): string {
+  // Prefer the actual request origin so magic links land where the
+  // requester is browsing (production, preview, or local).
+  try {
+    const url = new URL(req.url);
+    return url.origin;
+  } catch {
+    return process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -30,6 +41,7 @@ export async function POST(req: Request) {
 
     const { name, email, company, role, notes } = parsed.data;
     const normalizedEmail = email.toLowerCase();
+    const origin = getOriginFromRequest(req);
 
     // If this email already has an approved request, just issue a new
     // magic link directly — no admin re-approval needed.
@@ -43,16 +55,18 @@ export async function POST(req: Request) {
     const prior = existing[0];
 
     if (prior?.status === "approved") {
-      await issueMagicLink({ email: normalizedEmail, name: prior.name });
+      await issueMagicLink({
+        email: normalizedEmail,
+        name: prior.name,
+        origin,
+      });
       return NextResponse.json({ ok: true, mode: "reissued" });
     }
 
     if (prior?.status === "pending") {
-      // Already pending — don't spam admin, just acknowledge
       return NextResponse.json({ ok: true, mode: "already-pending" });
     }
 
-    // Fresh request (new email, or previously denied)
     const [request] = await db
       .insert(accessRequests)
       .values({
@@ -67,7 +81,6 @@ export async function POST(req: Request) {
 
     const adminEmail = process.env.ADMIN_EMAIL;
     if (adminEmail) {
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "";
       const template = adminNotificationTemplate({
         request: {
           id: request.id,
@@ -77,7 +90,7 @@ export async function POST(req: Request) {
           role: request.role,
           notes: request.notes,
         },
-        adminUrl: `${baseUrl}/lloyds/admin`,
+        adminUrl: `${origin}/lloyds/admin`,
       });
       try {
         await sendEmail({ to: adminEmail, ...template });
@@ -96,9 +109,11 @@ export async function POST(req: Request) {
 async function issueMagicLink({
   email,
   name,
+  origin,
 }: {
   email: string;
   name: string;
+  origin: string;
 }) {
   const { token, tokenHash, expiresAt } = generateMagicLinkToken();
   await db.insert(magicLinkTokens).values({
@@ -107,8 +122,7 @@ async function issueMagicLink({
     expiresAt,
   });
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
-  const url = `${baseUrl}/api/auth/signin?token=${token}`;
+  const url = `${origin}/api/auth/signin?token=${token}`;
   const template = magicLinkEmailTemplate({ url, recipientName: name });
 
   try {

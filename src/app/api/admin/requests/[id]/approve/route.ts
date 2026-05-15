@@ -6,7 +6,7 @@ import { generateMagicLinkToken } from "@/lib/auth";
 import { sendEmail, magicLinkEmailTemplate } from "@/lib/email";
 
 export async function POST(
-  _req: Request,
+  request: Request,
   { params }: { params: { id: string } },
 ) {
   if (!(await isAdminAuthenticated())) {
@@ -38,8 +38,15 @@ export async function POST(
     expiresAt,
   });
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
-  const url = `${baseUrl}/api/auth/signin?token=${token}`;
+  // Derive origin from the request so admin-approval on preview deployments
+  // produces preview-pointing links, and production produces prod links.
+  let origin: string;
+  try {
+    origin = new URL(request.url).origin;
+  } catch {
+    origin = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
+  }
+  const url = `${origin}/api/auth/signin?token=${token}`;
 
   const template = magicLinkEmailTemplate({
     url,

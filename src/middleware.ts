@@ -2,24 +2,39 @@ import { NextResponse, type NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 
 const SESSION_COOKIE = "nsai_session";
+const ADMIN_COOKIE = "nsai_admin";
+
+async function verify(token: string | undefined): Promise<unknown | null> {
+  if (!token) return null;
+  const secret = process.env.AUTH_SECRET;
+  if (!secret) return null;
+  try {
+    const { payload } = await jwtVerify(
+      token,
+      new TextEncoder().encode(secret),
+    );
+    return payload;
+  } catch {
+    return null;
+  }
+}
 
 async function isAuthenticated(req: NextRequest): Promise<boolean> {
-  const token = req.cookies.get(SESSION_COOKIE)?.value;
-  if (!token) return false;
-  const secret = process.env.AUTH_SECRET;
-  if (!secret) return false;
-  try {
-    await jwtVerify(token, new TextEncoder().encode(secret));
+  // Either a regular user session OR an admin session grants access.
+  const userPayload = await verify(req.cookies.get(SESSION_COOKIE)?.value);
+  if (userPayload) return true;
+
+  const adminPayload = await verify(req.cookies.get(ADMIN_COOKIE)?.value);
+  if (adminPayload && (adminPayload as { admin?: boolean }).admin === true) {
     return true;
-  } catch {
-    return false;
   }
+
+  return false;
 }
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // Gated paths
   const protectedPath =
     pathname.startsWith("/lloyds/demos") ||
     pathname.startsWith("/lloyds/positioning");
