@@ -14,7 +14,7 @@ const demos = [
     slug: "underwriting",
     title: "Lead Underwriting Workbench",
     subtitle: "Risk analysis · portfolio context · renewal intelligence",
-    status: "coming" as const,
+    status: "available" as const,
   },
   {
     number: "03",

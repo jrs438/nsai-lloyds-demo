@@ -1,12 +1,18 @@
-import { ComingSoon } from "@/components/lloyds/ComingSoon";
+import { UW_SCENARIO_LIST } from "@/data/underwriting-submissions";
+import { evaluateUnderwriting } from "@/lib/underwriting-engine";
+import { MercatorPortfolio } from "@/data/portfolio";
+import { UnderwritingWorkbench } from "./UnderwritingWorkbench";
 
 export default function UnderwritingDemoPage() {
+  const scenarios = UW_SCENARIO_LIST.map((s) => ({
+    scenario: s,
+    decision: evaluateUnderwriting(s),
+  }));
+
   return (
-    <ComingSoon
-      number="02"
-      title="Lead Underwriting Workbench"
-      summary="Risk analysis with portfolio context, treaty implications, and rate-adequacy derivation. New-risk and renewal modes will share the rule architecture from Demo 01."
-      phase="Phase 2"
+    <UnderwritingWorkbench
+      scenarios={scenarios}
+      portfolio={MercatorPortfolio}
     />
   );
 }
