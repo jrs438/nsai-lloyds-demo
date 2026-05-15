@@ -65,6 +65,59 @@ body {
   }
 }
 
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #111111 !important;
+  }
+  /* Hide everything except the slip document */
+  .slip-overlay {
+    display: none !important;
+  }
+  .slip-dialog {
+    position: static !important;
+    background: #ffffff !important;
+    overflow: visible !important;
+  }
+  .slip-chrome {
+    display: none !important;
+  }
+  .slip-document {
+    max-width: 100% !important;
+  }
+  .slip-paper {
+    background: #ffffff !important;
+    border: none !important;
+    color: #111111 !important;
+  }
+  .slip-paper section,
+  .slip-paper header,
+  .slip-paper footer {
+    background: #ffffff !important;
+    border-color: #cccccc !important;
+    color: #111111 !important;
+    page-break-inside: avoid;
+  }
+  .slip-paper * {
+    color: #111111 !important;
+    border-color: #cccccc !important;
+  }
+  .slip-paper .section-label {
+    color: #555555 !important;
+  }
+  .slip-paper .font-mono {
+    color: #555555 !important;
+  }
+  /* Hide site chrome */
+  header[class*="border-b"],
+  footer[class*="border-t"] {
+    display: none !important;
+  }
+  @page {
+    margin: 12mm;
+  }
+}
+
 @layer components {
   .btn-primary {
     @apply inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium transition-colors;
