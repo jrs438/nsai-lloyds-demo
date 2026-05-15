@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { and, eq, gt, isNull } from "drizzle-orm";
+import { and, eq, gt } from "drizzle-orm";
 import { db, magicLinkTokens } from "@/lib/db";
 import {
   hashToken,
@@ -27,6 +27,8 @@ export async function GET(req: NextRequest) {
   const tokenHash = hashToken(token);
   const now = new Date();
 
+  // Token is valid for its full lifetime and can be redeemed any number
+  // of times. The session cookie issued on each click is itself 30 days.
   const rows = await db
     .select()
     .from(magicLinkTokens)
@@ -34,7 +36,6 @@ export async function GET(req: NextRequest) {
       and(
         eq(magicLinkTokens.tokenHash, tokenHash),
         gt(magicLinkTokens.expiresAt, now),
-        isNull(magicLinkTokens.usedAt),
       ),
     )
     .limit(1);
@@ -44,6 +45,7 @@ export async function GET(req: NextRequest) {
     return errorRedirect(req, "expired-or-used");
   }
 
+  // Record last redemption time for analytics, but don't invalidate.
   await db
     .update(magicLinkTokens)
     .set({ usedAt: now })

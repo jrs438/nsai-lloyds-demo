@@ -4,7 +4,7 @@ import { SignJWT, jwtVerify } from "jose";
 
 const SESSION_COOKIE_NAME = "nsai_session";
 const SESSION_DURATION_DAYS = 30;
-const MAGIC_LINK_DURATION_DAYS = 7;
+const MAGIC_LINK_DURATION_DAYS = 30;
 
 function getSecret(): Uint8Array {
   const secret = process.env.AUTH_SECRET;

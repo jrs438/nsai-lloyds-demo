@@ -2,7 +2,7 @@ import Link from "next/link";
 
 const ERROR_MESSAGES: Record<string, string> = {
   "missing-token": "No sign-in token was provided.",
-  "expired-or-used": "Your magic link has expired or already been used.",
+  "expired-or-used": "Your magic link has expired. Request a fresh one.",
 };
 
 export default function SignInPage({
