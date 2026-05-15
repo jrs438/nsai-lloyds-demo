@@ -27,34 +27,45 @@ function initialLines(placement: PlacementRecommendation): SlipLine[] {
   const lead =
     placement.recommendedLeads[0] ?? placement.conditionalLeads[0] ?? null;
 
-  const lines: SlipLine[] = [];
+  if (!lead) return [];
 
-  if (lead) {
-    lines.push({
+  const leadPct = Math.round(lead.recommendedLeadLine * 100 * 10) / 10;
+
+  const lines: SlipLine[] = [
+    {
       syndicateId: lead.syndicate.id,
-      percentage: Math.round(lead.recommendedLeadLine * 100 * 10) / 10,
+      percentage: leadPct,
       isLead: true,
-    });
-  }
+    },
+  ];
 
-  for (const ev of placement.recommendedFollowers) {
-    if (ev.syndicate.id === lead?.syndicate.id) continue;
+  let remaining = 100 - leadPct;
+
+  // Pool of follower candidates ranked by match score / role suitability
+  const candidates = [
+    ...placement.recommendedFollowers,
+    ...placement.recommendedLeads.slice(1),
+    ...placement.conditionalLeads.filter(
+      (c) => c.syndicate.id !== lead.syndicate.id,
+    ),
+  ];
+
+  for (const ev of candidates) {
+    if (remaining <= 0.05) break;
+    const cap = ev.recommendedFollowLine * 100;
+    const take = Math.min(remaining, cap);
+    if (take < 0.5) continue;
     lines.push({
       syndicateId: ev.syndicate.id,
-      percentage: Math.round(ev.recommendedFollowLine * 100 * 10) / 10,
+      percentage: Math.round(take * 10) / 10,
       isLead: false,
     });
+    remaining = Math.round((remaining - take) * 10) / 10;
   }
 
-  // Add eligible non-lead syndicates to bring closer to 100
-  const used = new Set(lines.map((l) => l.syndicateId));
-  for (const ev of placement.recommendedLeads.slice(1)) {
-    if (used.has(ev.syndicate.id)) continue;
-    lines.push({
-      syndicateId: ev.syndicate.id,
-      percentage: Math.round(ev.recommendedFollowLine * 100 * 10) / 10,
-      isLead: false,
-    });
+  // Residual: top up the lead (within reason)
+  if (remaining > 0.05 && lines.length > 0) {
+    lines[0].percentage = Math.round((lines[0].percentage + remaining) * 10) / 10;
   }
 
   return lines;
@@ -117,6 +128,23 @@ export function SlipBuilder({
 
   function setLead(idx: number) {
     setLines((prev) => prev.map((l, i) => ({ ...l, isLead: i === idx })));
+  }
+
+  function balanceTo100() {
+    if (lines.length === 0) return;
+    const current = lines.reduce((s, l) => s + l.percentage, 0);
+    if (current === 0) return;
+    const factor = 100 / current;
+    setLines((prev) =>
+      prev.map((l) => ({
+        ...l,
+        percentage: Math.round(l.percentage * factor * 10) / 10,
+      })),
+    );
+  }
+
+  function resetToRecommendation() {
+    setLines(initialLines(placement));
   }
 
   function addAvailableSyndicate(syndicateId: string) {
@@ -221,18 +249,24 @@ export function SlipBuilder({
                           style={{ background: "var(--bg-primary)" }}
                         >
                           <div className="flex items-center justify-between gap-2 mb-2">
-                            <button
-                              onClick={() => setLead(idx)}
-                              className="text-xs font-mono"
+                            <label
+                              className="flex items-center gap-1.5 cursor-pointer text-xs font-mono"
                               style={{
                                 color: line.isLead
                                   ? "var(--accent-primary)"
                                   : "var(--text-tertiary)",
                               }}
-                              title="Set as slip leader"
+                              title="Only one syndicate can be slip lead"
                             >
-                              {line.isLead ? "★ LEAD" : "set lead"}
-                            </button>
+                              <input
+                                type="radio"
+                                name="slip-lead"
+                                checked={line.isLead}
+                                onChange={() => setLead(idx)}
+                                className="accent-[var(--accent-primary)]"
+                              />
+                              {line.isLead ? "Slip lead" : "Make lead"}
+                            </label>
                             <button
                               onClick={() => removeLine(idx)}
                               className="text-xs"
@@ -347,6 +381,23 @@ export function SlipBuilder({
                             : `${(100 - totalSigned).toFixed(1)}% to place`}
                         </>
                       )}
+                    </div>
+                    <div className="mt-3 flex gap-2">
+                      <button
+                        onClick={balanceTo100}
+                        disabled={lines.length === 0 || totalSigned === 0}
+                        className="text-xs px-2 py-1.5 flex-1 border border-subtle hover:border-default disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        title="Scale all lines proportionally to total 100%"
+                      >
+                        Balance to 100%
+                      </button>
+                      <button
+                        onClick={resetToRecommendation}
+                        className="text-xs px-2 py-1.5 flex-1 border border-subtle hover:border-default transition-colors"
+                        title="Reset to system recommendation"
+                      >
+                        Reset
+                      </button>
                     </div>
                   </div>
                 </div>
