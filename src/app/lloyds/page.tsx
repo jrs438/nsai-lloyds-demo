@@ -18,7 +18,7 @@ const demos = [
     subtitle: "Risk analysis · portfolio context · renewal intelligence",
     description:
       "Full underwriting decision support with portfolio impact, treaty implications, and rate-adequacy derivation. New-risk and renewal modes show the same reasoning architecture applied to different starting points.",
-    status: "phase-2",
+    status: "available",
   },
   {
     number: "03",
