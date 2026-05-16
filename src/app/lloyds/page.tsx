@@ -36,7 +36,7 @@ const demos = [
     subtitle: "Manuscripted deviation analysis · audit trail",
     description:
       "Side-by-side analysis of standard LMA wordings against manuscripted variants, classifying every deviation as broadening, narrowing, ambiguous, or neutral — with risk implication and downstream rule effect.",
-    status: "phase-4",
+    status: "available",
   },
 ];
 

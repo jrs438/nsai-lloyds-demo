@@ -1,12 +1,16 @@
-import { ComingSoon } from "@/components/lloyds/ComingSoon";
+import {
+  LMA5395_TEXT,
+  MANUSCRIPTED_TEXT,
+  DEVIATIONS,
+} from "@/data/wordings";
+import { WordingsAnalysisDemo } from "./WordingsAnalysisDemo";
 
 export default function WordingsDemoPage() {
   return (
-    <ComingSoon
-      number="04"
-      title="Wordings & Coverage Analysis"
-      summary="Side-by-side analysis of standard LMA wordings against manuscripted variants, classifying every deviation as broadening, narrowing, ambiguous, or neutral."
-      phase="Phase 4"
+    <WordingsAnalysisDemo
+      standardText={LMA5395_TEXT}
+      manuscriptText={MANUSCRIPTED_TEXT}
+      deviations={DEVIATIONS}
     />
   );
 }

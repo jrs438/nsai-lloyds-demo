@@ -28,7 +28,7 @@ const demos = [
     slug: "wordings",
     title: "Wordings & Coverage Analysis",
     subtitle: "Manuscripted deviation analysis · audit trail",
-    status: "coming" as const,
+    status: "available" as const,
   },
 ];
 
