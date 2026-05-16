@@ -1,12 +1,15 @@
-import { ComingSoon } from "@/components/lloyds/ComingSoon";
+import { CLAIM_LIST } from "@/data/claims";
+import { evaluateClaim } from "@/lib/claims-engine";
+import { ClaimsDemo } from "./ClaimsDemo";
 
 export default function ClaimsDemoPage() {
-  return (
-    <ComingSoon
-      number="03"
-      title="Claims Intelligence"
-      summary="FNOL processing with coverage logic that activates and deactivates rules based on manuscripted endorsements. Becomes the litigation defense."
-      phase="Phase 3"
-    />
-  );
+  const claims = CLAIM_LIST.map((c) => ({
+    key: c.key,
+    label: c.label,
+    shortSummary: c.shortSummary,
+    claim: c.claim,
+    evaluation: evaluateClaim(c.claim),
+  }));
+
+  return <ClaimsDemo claims={claims} />;
 }
