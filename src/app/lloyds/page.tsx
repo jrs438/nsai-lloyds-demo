@@ -27,7 +27,7 @@ const demos = [
     subtitle: "FNOL processing · coverage logic · settlement strategy",
     description:
       "Coverage analysis applies real wording-to-rule binding. When a manuscripted endorsement modifies the base wording, the rule evaluator picks up which rules to activate or deactivate. The claims trace becomes the litigation defense.",
-    status: "phase-3",
+    status: "available",
   },
   {
     number: "04",

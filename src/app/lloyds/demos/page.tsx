@@ -21,7 +21,7 @@ const demos = [
     slug: "claims",
     title: "Claims Intelligence",
     subtitle: "FNOL processing · coverage logic · settlement strategy",
-    status: "coming" as const,
+    status: "available" as const,
   },
   {
     number: "04",
