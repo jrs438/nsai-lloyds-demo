@@ -35,9 +35,10 @@ async function isAuthenticated(req: NextRequest): Promise<boolean> {
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  const protectedPath =
-    pathname.startsWith("/lloyds/demos") ||
-    pathname.startsWith("/lloyds/positioning");
+  // Only /lloyds/demos/* is gated. /lloyds/positioning is public — it's the
+  // landing content, and visitors should be able to read it before deciding
+  // whether to request access.
+  const protectedPath = pathname.startsWith("/lloyds/demos");
 
   if (!protectedPath) {
     return NextResponse.next();
@@ -54,5 +55,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/lloyds/demos/:path*", "/lloyds/positioning/:path*"],
+  matcher: ["/lloyds/demos/:path*"],
 };
