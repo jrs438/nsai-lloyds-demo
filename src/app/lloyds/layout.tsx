@@ -1,5 +1,6 @@
 import { SiteHeader } from "@/components/lloyds/SiteHeader";
 import { SiteFooter } from "@/components/lloyds/SiteFooter";
+import { CrossSiteNav } from "@/components/lloyds/CrossSiteNav";
 import { getSession } from "@/lib/auth";
 
 export default async function LloydsLayout({
@@ -11,6 +12,7 @@ export default async function LloydsLayout({
 
   return (
     <div className="min-h-screen flex flex-col">
+      <CrossSiteNav />
       <SiteHeader authenticated={!!session} />
       <main className="flex-1">{children}</main>
       <SiteFooter />

@@ -4,6 +4,9 @@ interface SiteHeaderProps {
   authenticated?: boolean;
 }
 
+const contentLinkClasses = "text-sm hover:text-white transition-colors";
+const contentLinkStyle = { color: "var(--text-secondary)" } as const;
+
 export function SiteHeader({ authenticated }: SiteHeaderProps) {
   return (
     <header className="border-b border-subtle">
@@ -17,38 +20,39 @@ export function SiteHeader({ authenticated }: SiteHeaderProps) {
           </div>
         </Link>
         <nav className="flex items-center gap-8">
+          {/* Content nav — same order for everyone; positioning is the public
+              landing, demonstrations trigger the auth flow if you're not
+              signed in. */}
+          <Link
+            href="/lloyds/positioning"
+            className={contentLinkClasses}
+            style={contentLinkStyle}
+          >
+            Positioning
+          </Link>
+          <Link
+            href="/lloyds/demos"
+            className={contentLinkClasses}
+            style={contentLinkStyle}
+          >
+            Demonstrations
+          </Link>
           {authenticated ? (
-            <>
-              <Link
-                href="/lloyds/demos"
+            <form action="/api/auth/signout" method="POST">
+              <button
+                type="submit"
                 className="text-sm hover:text-white transition-colors"
-                style={{ color: "var(--text-secondary)" }}
+                style={{ color: "var(--text-tertiary)" }}
               >
-                Demonstrations
-              </Link>
-              <Link
-                href="/lloyds/positioning"
-                className="text-sm hover:text-white transition-colors"
-                style={{ color: "var(--text-secondary)" }}
-              >
-                Positioning
-              </Link>
-              <form action="/api/auth/signout" method="POST">
-                <button
-                  type="submit"
-                  className="text-sm hover:text-white transition-colors"
-                  style={{ color: "var(--text-tertiary)" }}
-                >
-                  Sign out
-                </button>
-              </form>
-            </>
+                Sign out
+              </button>
+            </form>
           ) : (
             <>
               <Link
                 href="/lloyds/signin"
-                className="text-sm hover:text-white transition-colors"
-                style={{ color: "var(--text-secondary)" }}
+                className={contentLinkClasses}
+                style={contentLinkStyle}
               >
                 Sign in
               </Link>
