@@ -48,17 +48,23 @@ export async function setSessionCookie(token: string) {
   const expires = new Date();
   expires.setDate(expires.getDate() + SESSION_DURATION_DAYS);
 
+  // COOKIE_DOMAIN=.nsai4insurance.com in Production enables SSO across
+  // both apex and the lloyds subdomain. Leave unset in Preview / dev.
+  const domain = process.env.COOKIE_DOMAIN || undefined;
+
   cookies().set(SESSION_COOKIE_NAME, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
+    domain,
     expires,
   });
 }
 
 export async function clearSessionCookie() {
-  cookies().delete(SESSION_COOKIE_NAME);
+  const domain = process.env.COOKIE_DOMAIN || undefined;
+  cookies().delete({ name: SESSION_COOKIE_NAME, path: "/", domain });
 }
 
 export async function getSession(): Promise<SessionPayload | null> {
