@@ -28,17 +28,20 @@ export async function createAdminSession(): Promise<string> {
 export async function setAdminCookie(token: string) {
   const expires = new Date();
   expires.setHours(expires.getHours() + SESSION_DURATION_HOURS);
+  const domain = process.env.COOKIE_DOMAIN || undefined;
   cookies().set(ADMIN_COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
+    domain,
     expires,
   });
 }
 
 export async function clearAdminCookie() {
-  cookies().delete(ADMIN_COOKIE);
+  const domain = process.env.COOKIE_DOMAIN || undefined;
+  cookies().delete({ name: ADMIN_COOKIE, path: "/", domain });
 }
 
 export async function isAdminAuthenticated(): Promise<boolean> {
